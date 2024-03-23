@@ -1,3 +1,5 @@
+use once_cell::sync::OnceCell;
+
 use deno_core::{
     serde_json, serde_v8,
     v8::{self, CreateParams, HandleScope, OwnedIsolate},
@@ -31,9 +33,13 @@ impl JsRuntimeParams {
 
 impl JsRuntime {
     pub fn init() {
-        let platform = v8::new_default_platform(0, false).make_shared();
-        v8::V8::initialize_platform(platform);
-        v8::V8::initialize();
+        static V8_INITIAL: OnceCell<()> = OnceCell::new();
+
+        V8_INITIAL.get_or_init(|| {
+            let platform = v8::new_default_platform(0, false).make_shared();
+            v8::V8::initialize_platform(platform);
+            v8::V8::initialize();
+        });
     }
     pub fn new(params: JsRuntimeParams) -> Self {
         let isolate = v8::Isolate::new(params.into_inner());
