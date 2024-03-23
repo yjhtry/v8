@@ -32,7 +32,7 @@ fn main() {
 
     let value: Data = serde_v8::from_v8(context_scope, result).unwrap();
 
-    println!("{:?}", value)
+    println!("{:?}", value.message)
 }
 fn init() {
     let platform = v8::new_default_platform(0, false).make_shared();
