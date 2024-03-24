@@ -10,8 +10,6 @@ use crate::utils::execute_script;
 
 use lazy_static::lazy_static;
 
-const GLUE: &str = include_str!("glue.js");
-
 lazy_static! {
     pub static ref EXTERNAL_REFERENCES: ExternalReferences = ExternalReferences::new(&[
         ExternalReference {
@@ -25,24 +23,46 @@ lazy_static! {
 
 pub struct Extensions;
 
+macro_rules! bindings {
+    ($scope:ident, $name:expr, $func:expr) => {
+        let func = v8::Function::new($scope, $func).unwrap();
+        let code = format!(
+            r"(func) => {{
+                globalThis.{name} = func;
+              }};",
+            name = $name
+        );
+
+        if let Ok(result) = execute_script($scope, code) {
+            let glue_func = v8::Local::<v8::Function>::try_from(result).unwrap();
+            let v = v8::undefined($scope).into();
+            let args = [func.into()];
+
+            glue_func.call($scope, v, &args).unwrap();
+        }
+    };
+}
+
 impl Extensions {
     pub fn install(scope: &mut HandleScope) {
-        let bindings = v8::Object::new(scope);
-        let name = v8::String::new(scope, "print").unwrap();
-        let func = v8::Function::new(scope, print).unwrap();
-        bindings.set(scope, name.into(), func.into()).unwrap();
+        bindings!(scope, "print", print);
+        bindings!(scope, "fetch", fetch);
+        // let bindings = v8::Object::new(scope);
+        // let name = v8::String::new(scope, "print").unwrap();
+        // let func = v8::Function::new(scope, print).unwrap();
+        // bindings.set(scope, name.into(), func.into()).unwrap();
 
-        let name = v8::String::new(scope, "fetch").unwrap();
-        let func = v8::Function::new(scope, fetch).unwrap();
-        bindings.set(scope, name.into(), func.into()).unwrap();
+        // let name = v8::String::new(scope, "fetch").unwrap();
+        // let func = v8::Function::new(scope, fetch).unwrap();
+        // bindings.set(scope, name.into(), func.into()).unwrap();
 
-        if let Ok(result) = execute_script(scope, GLUE) {
-            let func = v8::Local::<v8::Function>::try_from(result).unwrap();
-            let v = v8::undefined(scope).into();
-            let args = [bindings.into()];
+        // if let Ok(result) = execute_script(scope, GLUE) {
+        //     let func = v8::Local::<v8::Function>::try_from(result).unwrap();
+        //     let v = v8::undefined(scope).into();
+        //     let args = [bindings.into()];
 
-            func.call(scope, v, &args).unwrap();
-        }
+        //     func.call(scope, v, &args).unwrap();
+        // }
     }
 }
 
