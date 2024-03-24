@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+clap = { version = "4.5.3", features = ["derive"] }
 deno_core = "0.272.0"
+lazy_static = "1.4.0"
 once_cell = "1.19.0"
 reqwest = { version = "0.12.1", features = ["blocking"] }
 serde = { version = "1.0.197", features = ["derive"] }

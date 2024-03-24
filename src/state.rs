@@ -6,7 +6,7 @@ type GlobalContext = Global<Context>;
 type JsRuntimeStateRef = Rc<RefCell<JsRuntimeState>>;
 
 pub struct JsRuntimeState {
-    state: Option<GlobalContext>,
+    context: Option<GlobalContext>,
 }
 
 impl JsRuntimeState {
@@ -19,14 +19,14 @@ impl JsRuntimeState {
         };
 
         Rc::new(RefCell::new(JsRuntimeState {
-            state: Some(context),
+            context: Some(context),
         }))
     }
 
     pub fn get_context(isolate: &mut Isolate) -> GlobalContext {
         let state = isolate.get_slot::<JsRuntimeStateRef>().unwrap().clone();
 
-        let context = &state.borrow().state;
+        let context = &state.borrow().context;
 
         context.as_ref().unwrap().clone()
     }
