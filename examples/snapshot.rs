@@ -45,6 +45,8 @@ fn snapshot_run(path: impl AsRef<Path>) {
         function hello() {
             let result = print({a: 1, b: 2});
             print(result);
+
+            print(test_name)
             return "hello world";
         }
         hello();

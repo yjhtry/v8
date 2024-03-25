@@ -24,11 +24,10 @@ lazy_static! {
 pub struct Extensions;
 
 macro_rules! bindings {
-    ($scope:ident, $name:expr, $func:expr) => {
-        let func = v8::Function::new($scope, $func).unwrap();
+    ($scope:ident, $name:expr, $target:expr) => {
         let code = format!(
-            r"(func) => {{
-                globalThis.{name} = func;
+            r"(target) => {{
+                globalThis.{name} = target;
               }};",
             name = $name
         );
@@ -36,7 +35,7 @@ macro_rules! bindings {
         if let Ok(result) = execute_script($scope, code) {
             let glue_func = v8::Local::<v8::Function>::try_from(result).unwrap();
             let v = v8::undefined($scope).into();
-            let args = [func.into()];
+            let args = [$target.into()];
 
             glue_func.call($scope, v, &args).unwrap();
         }
@@ -45,24 +44,13 @@ macro_rules! bindings {
 
 impl Extensions {
     pub fn install(scope: &mut HandleScope) {
-        bindings!(scope, "print", print);
-        bindings!(scope, "fetch", fetch);
-        // let bindings = v8::Object::new(scope);
-        // let name = v8::String::new(scope, "print").unwrap();
-        // let func = v8::Function::new(scope, print).unwrap();
-        // bindings.set(scope, name.into(), func.into()).unwrap();
-
-        // let name = v8::String::new(scope, "fetch").unwrap();
-        // let func = v8::Function::new(scope, fetch).unwrap();
-        // bindings.set(scope, name.into(), func.into()).unwrap();
-
-        // if let Ok(result) = execute_script(scope, GLUE) {
-        //     let func = v8::Local::<v8::Function>::try_from(result).unwrap();
-        //     let v = v8::undefined(scope).into();
-        //     let args = [bindings.into()];
-
-        //     func.call(scope, v, &args).unwrap();
-        // }
+        bindings!(scope, "print", v8::Function::new(scope, print).unwrap());
+        bindings!(scope, "fetch", v8::Function::new(scope, fetch).unwrap());
+        bindings!(
+            scope,
+            "test_name",
+            v8::String::new(scope, "this is test_name").unwrap()
+        );
     }
 }
 
