@@ -51,7 +51,7 @@ fn snapshot_run(path: impl AsRef<Path>) {
         }
         hello();
     "#;
-    let result = runtime.execute_script(code);
+    let result = runtime.execute_script(code, true);
 
     println!("Result is: {:?}", result);
 }

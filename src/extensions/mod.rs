@@ -32,7 +32,7 @@ macro_rules! bindings {
             name = $name
         );
 
-        if let Ok(result) = execute_script($scope, code) {
+        if let Ok(result) = execute_script($scope, code, false) {
             let glue_func = v8::Local::<v8::Function>::try_from(result).unwrap();
             let v = v8::undefined($scope).into();
             let args = [$target.into()];

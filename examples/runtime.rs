@@ -6,7 +6,7 @@ fn main() {
     let mut runtime = JsRuntime::new(None);
 
     let code = r#"
-        function hello() {
+        async function hello() {
             print("Hello, World!");
 
             let res = fetch("https://www.rust-lang.org/");
@@ -16,10 +16,10 @@ fn main() {
             return { message: "Hello, Rust!" };
         }
 
-        hello();
+        hello()
     "#;
 
-    let result = runtime.execute_script(code);
+    let result = runtime.execute_script(code, true);
 
     println!("{:?}", result);
 }
